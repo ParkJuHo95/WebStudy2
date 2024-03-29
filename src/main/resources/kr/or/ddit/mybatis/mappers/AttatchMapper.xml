@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.AttatchMapper">
+	<insert id="insertAttatch" parameterType="AttatchVO">
+		<selectKey order="BEFORE" keyProperty="attNo" resultType="int">
+			SELECT NVL(MAX(ATT_NO), 0)+1
+			FROM ATTATCH
+		</selectKey>
+		INSERT INTO ATTATCH(
+			ATT_NO
+			, BO_NO
+			, ATT_FILENAME
+			, ATT_SAVENAME
+			, ATT_MIME
+			, ATT_FILESIZE
+			, ATT_FANCYSIZE
+			, ATT_DOWNLOAD
+		)VALUES(
+			#{attNo, jdbcType=INTEGER}
+			, #{boNo, jdbcType=INTEGER}
+			, #{attFilename, jdbcType=VARCHAR}
+			, #{attSavename, jdbcType=VARCHAR}
+			, #{attMime, jdbcType=VARCHAR}
+			, #{attFilesize, jdbcType=INTEGER}
+			, #{attFancysize, jdbcType=VARCHAR}
+			, #{attDownload, jdbcType=INTEGER}
+		)
+	</insert>
+	<select id="selectAttatch" parameterType="int" resultType="AttatchVO">
+		SELECT 
+			ATT_NO, BO_NO, ATT_FILENAME
+			, ATT_SAVENAME, ATT_MIME, ATT_FILESIZE
+			, ATT_FANCYSIZE, ATT_DOWNLOAD
+		FROM ATTATCH
+		WHERE ATT_NO = #{attNo}
+	</select>
+	<delete id="deleteAttatch">
+		DELETE FROM ATTATCH
+		WHERE ATT_NO = #{attNo}
+	</delete>
+</mapper>

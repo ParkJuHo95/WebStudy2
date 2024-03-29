@@ -1,0 +1,26 @@
+첨부파일 구조 추가
+
+1차 (조회)
+
+1. Attatch 테이블 추가
+2. 모델 객체로 사용할 AttatchVO 추가, BoardVO 변경
+3. BoardMapper 조인 쿼리 변경 --> resultMap 추가 및 반영
+4. boardView.jsp 변경 (첨부파일 랜더링)
+
+====> 저장과 다운로드에서 사용될 첨부파일의 이진데이터 저장 위치 설정 : appInfo 변경
+
+2차 (저장)
+
+1. boardForm.jsp 변경 
+	1) --> multipart enctype 과 multipartResolver 구조 확인
+	2) --> (optional)  boIp 와 boWriter 입력 태그 제거시 게시글 작성 처리 방법.
+2. BoardInsertController 확인 및 커맨드 객체로 사용할 BoardVO 와 AttatchVO 변경
+3. AttatchMapper(interface + mapper xml) 추가
+4. BoardService 와 구현체에 첨부파일 저장 로직 추가
+
+3차 (다운로드)
+
+1. boardView 에 랜더링된 첨부파일에 대해 다운로드 요청 UI 추가
+2. 해당 요청을 처리할 DownloadController 추가
+3. SpringMVCLab01 의 case10번 참조
+

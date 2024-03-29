@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.BoardMapper">
+	<insert id="insert" parameterType="BoardVO">
+		<selectKey keyProperty="boNo" resultType="int" order="BEFORE">
+			SELECT FREEBOARD_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO FREEBOARD(
+			BO_NO
+			, BO_TITLE
+			, BO_WRITER
+			, BO_IP
+			, BO_MAIL
+			, BO_PASS
+			, BO_CONTENT
+			, BO_PARENT
+		)VALUES(
+			 #{boNo, jdbcType=NUMERIC}
+			, #{boTitle, jdbcType=VARCHAR}
+			, #{boWriter, jdbcType=VARCHAR}
+			, #{boIp, jdbcType=VARCHAR}
+			, #{boMail, jdbcType=VARCHAR}
+			, #{boPass, jdbcType=VARCHAR}
+			, #{boContent, jdbcType=CLOB}
+			, #{boParent, jdbcType=NUMERIC}
+		)		
+	</insert>
+	<resultMap type="BoardVO" id="boardMap" autoMapping="true">
+		<id property="boNo" column="BO_NO"/>
+		<collection property="attatchList" ofType="AttatchVO">
+			<id property="attNo" column="ATT_NO"/>
+			<result property="attFilename" column="ATT_FILENAME"/>
+			<result property="attFilesize" column="ATT_FILESIZE"/>
+			<result property="attFancysize" column="ATT_FANCYSIZE"/>
+		</collection>
+	</resultMap>
+	<select id="select" parameterType="int" resultMap="boardMap">
+		SELECT 
+			BO_NO, BO_TITLE, BO_WRITER, BO_IP
+			, BO_MAIL, BO_PASS, BO_CONTENT
+			, BO_DATE, BO_HIT, BO_PARENT
+			, ATT_NO, ATT_FILENAME
+			, ATT_FILESIZE, ATT_FANCYSIZE
+		FROM FREEBOARD LEFT OUTER JOIN ATTATCH USING(BO_NO)
+		WHERE BO_NO = #{boNo}
+	</select>
+	<sql id="searchFrag">
+	
+	</sql>
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT COUNT(*)
+		FROM FREEBOARD
+		<include refid="searchFrag" />
+	</select>
+	<select id="selectList" parameterType="PaginationInfo" resultType="BoardVO">
+		SELECT B.*
+		FROM (
+			SELECT A.*, ROWNUM RNUM
+			FROM (
+				SELECT 
+					BO_NO, BO_TITLE, BO_WRITER, BO_IP
+					, BO_MAIL, BO_PASS, BO_CONTENT
+					, BO_DATE, BO_HIT, BO_PARENT
+					, LEVEL
+				FROM FREEBOARD
+				<include refid="searchFrag" />
+				START WITH BO_PARENT IS NULL
+                CONNECT BY PRIOR BO_NO = BO_PARENT
+				ORDER SIBLINGS BY BO_NO DESC
+			) A
+		)B
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	<update id="update" parameterType="BoardVO">
+		UPDATE FREEBOARD
+		SET
+			BO_MAIL = #{boMail, jdbcType=VARCHAR}
+			, BO_CONTENT = #{boContent, jdbcType=CLOB}
+		WHERE BO_NO = #{boNo}
+	</update>
+	<delete id="delete" parameterType="int">
+		DELETE FROM FREEBOARD
+		WHERE BO_NO IN (
+			SELECT BO_NO 
+			FROM FREEBOARD
+			START WITH BO_NO = #{boNo}
+			CONNECT BY PRIOR BO_NO = BO_PARENT
+		)
+	</delete>
+</mapper>

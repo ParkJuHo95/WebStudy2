@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.MemberMapper">
+	<resultMap type="MemberVO" id="memberMap" autoMapping="true">
+		<id property="memId" column="MEM_ID"/>
+		<collection property="memRoles" ofType="string">
+			<result column="MEM_ROLE"/>
+		</collection>
+	</resultMap>
+	<select id="selectMemberByUsername" parameterType="string" resultMap="memberMap">
+		WITH DUMMY_MEMBER AS (
+			SELECT MEM_ID, MEM_NAME, MEM_MAIL, MEM_ROLE, MEM_PASS
+			FROM MEMBER
+			UNION 
+			SELECT MEM_ID, MEM_NAME, MEM_MAIL, 'ROLE_USER', MEM_PASS
+			FROM MEMBER
+			WHERE MEM_ID = 'c001'
+		)
+		SELECT *
+		FROM DUMMY_MEMBER
+		WHERE MEM_ID = #{username}
+	</select>
+</mapper>

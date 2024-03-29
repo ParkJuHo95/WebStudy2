@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+<!-- 	HandlerMapping : 컨트롤러(POJO) 객체와 핸들러 메소드를 검색하고, 해당 정보로 map 을 형성. -->
+<!-- 	HandlerAdapter : 핸들러 메소드의 호출자 -->
+<!-- 		- HandlerMethodArgumentResolver : 핸들러 메소드의 인자를 해결하기 위한 전략. -->
+<!-- 		- HandlerMethodReturnValueHandler : 핸들러 메소드내에서 반환되는 객체를 처리하는 전략. -->
+<!-- 	ViewResolver : 핸들러 메소드내에서 결정된 뷰에 대한 정보(logical view name)을 해결하는 전략.	 -->
+	<mvc:annotation-driven validator="validator">
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" 
+				p:objectMapper-ref="objectMapper"
+			/>
+		</mvc:message-converters>
+		<mvc:argument-resolvers>
+			<bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver" />
+		</mvc:argument-resolvers>
+	</mvc:annotation-driven>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource" 
+		p:basenames="kr.or.ddit.message.ErrorMessages"
+	/>
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" 
+		p:validationMessageSource-ref="messageSource"
+	/>
+	
+	<context:component-scan base-package="kr.or.ddit" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+
+	<bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+		<property name="featuresToDisable">
+			<array>
+				<util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS"/>
+			</array>		
+		</property>
+	</bean>
+
+	<bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" 
+		p:objectMapper-ref="objectMapper"
+	/>
+	
+	<!-- 		BeanNameViewResolver 등록 : 뷰네임과 매칭 되는 빈의 id 가 있는면, 해당 빈을 뷰레이어로 사용함. -->
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" 
+		p:order="1"
+	/>
+	<mvc:tiles-configurer>
+		<mvc:definitions location="/WEB-INF/tiles/*-tiles.xml"/>
+	</mvc:tiles-configurer>
+	<mvc:view-resolvers order="2">
+		<mvc:content-negotiation>
+			<mvc:default-views>
+				<ref bean="jsonView"/>
+			</mvc:default-views>
+		</mvc:content-negotiation>
+		<mvc:tiles/>
+<!-- 		InternalResourceViewResolver 등록 : html / jsp 와 같은 웹 리소스를 뷰레이어로 사용함.  -->
+		<mvc:jsp prefix="/WEB-INF/views/" suffix=".jsp"/>
+	</mvc:view-resolvers>
+	
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver" 
+		p:cookieName="localeCookie"
+		p:cookiePath="/"
+		p:cookieMaxAge="#{60*60*24*3}"
+	/>
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" 
+				p:paramName="lang"
+			/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+<!-- 	MultipartResolver : multipart 요청을 파싱해서 문자 기반의 파트는 parameter 로 만들고 -->
+<!-- 						file 기반의 파트는 MultipartFile 타입 객체로 캡슐화함. -->
+<!-- 						== MultipartHttpServletRequest wrapper request 를 생성함. -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" 
+		
+	/>
+	
+	<mvc:resources location="/resources/" mapping="/resources/**" cache-period="0" />
+</beans>
+
+
+
+
+
+
+
+
+
+
+

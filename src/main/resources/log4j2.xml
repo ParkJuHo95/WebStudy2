@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+logging : 현재 시스템의 실행 상황에 대한 정보를 기록하고, 향후 분석에 사용하기 위한 작업. 
+message를 appender에 기록하는 행위, 기록의 주체 : logger
+모든 log message는 기록할 당시 결정되는 이벤트 등급이 있음 : level
+logger에 설정된 level과 message를 기록할 당시의 level이 동일하거나 message level이 더 높다면, 기록이 된다.
+level 구조 : trace -> debug -> info -> warn -> error -> fatal
+-->
+
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{1.}%n================================%n%msg%n================================%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+  	<Logger name="kr.or.ddit" level="info"/>
+  	<Logger name="kr.or.ddit.mbti" level="info"/>
+  	<Logger name="kr.or.ddit.property" level="debug"/>
+  	<Logger name="jdbc.sqltiming" level="debug"/>
+  	<Logger name="jdbc.resultsettable" level="debug"/>
+  	<Logger name="org.springframework.context" level="info"/>
+  	<Logger name="org.springframework.web" level="debug"/>
+  	<Logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="trace"/>
+    <Root level="error">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>
+
+
+
+
+
+
+

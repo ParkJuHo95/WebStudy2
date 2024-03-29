@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.7.xsd">
+
+	<beans:bean id="passwordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder" />
+	<authentication-manager>
+		<authentication-provider user-service-ref="userDetailService">
+			<password-encoder ref="passwordEncoder"/>
+		</authentication-provider>
+	</authentication-manager>
+	
+	<beans:bean id="authenticationSuccessHandler" class="kr.or.ddit.security.handler.CustomAuthenticationSuccessHandler" 
+		p:defaultTargetUrl="/"
+		p:alwaysUseDefaultTargetUrl="true"
+	/>
+	<beans:bean id="logoutSuccessHandler" class="kr.or.ddit.security.handler.CustomLogoutSuccessHandler" 
+		p:defaultTargetUrl="/"
+	/>
+	<http pattern="/resources/**" security="none" />
+	<http auto-config="true">
+<!-- 			default-target-url="/" -->
+<!-- 			always-use-default-target="false" -->
+		<form-login 
+			login-page="/myLogin"
+			login-processing-url="/myLogin"
+			authentication-success-handler-ref="authenticationSuccessHandler"
+		/>
+<!-- 			logout-success-url="/"  -->
+		<logout 
+			logout-url="/logout" 
+			invalidate-session="false"
+			success-handler-ref="logoutSuccessHandler"
+		/>
+		<csrf disabled="true"/>
+		<intercept-url pattern="/index.do" access="permitAll"/>
+		<intercept-url pattern="/*/board/**" method="GET" access="hasRole('USER')"/>
+		<intercept-url pattern="/*/board/**" access="hasRole('ADMIN')"/>
+		<intercept-url pattern="/myLogin" access="permitAll"/>
+		<intercept-url pattern="/dummy" access="hasAuthority('ROLE_ADMIN')"/>
+		<intercept-url pattern="/**" access="isAuthenticated()"/>
+	</http>
+</beans:beans>
